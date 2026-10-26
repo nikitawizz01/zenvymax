@@ -17,4 +17,6 @@ create policy "anon can join waitlist"
   to anon
   with check (true);
 
+grant insert on public.waitlist to anon;
+
 -- Никаких select/update/delete для anon: чужие email не утекут через сайт.

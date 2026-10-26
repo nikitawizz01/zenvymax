@@ -20,9 +20,10 @@
    supabase secrets set ANTHROPIC_API_KEY=sk-ant-... ALLOWED_ORIGIN=https://nikitawizz01.github.io
    supabase functions deploy analyze
    ```
-3. **Сайт:** в `index.html` впиши `SUPABASE_URL` и `SUPABASE_ANON_KEY` (Project Settings → API).
+3. **Сайт:** `SUPABASE_URL` и публичный ключ уже вписаны в `index.html`. Форма email работает.
+4. **ИИ:** добавь `ANTHROPIC_API_KEY` в Supabase → Edge Functions → Secrets и поставь `AI_ENABLED = true` в `index.html`. До этого отчёт остаётся демо.
 
-Пока эти два поля пустые, сайт работает в демо-режиме: отчёт примерный, форма email скрыта.
+Функция `analyze` развёрнута с выключенной проверкой JWT: сайт обращается к ней с публичным ключом.
 
 ## Перед запуском
 

@@ -1,2 +1,2 @@
 [functions.analyze]
-verify_jwt = true
+verify_jwt = false

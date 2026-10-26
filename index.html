@@ -480,9 +480,10 @@ footer{border-top:1px solid var(--line);padding-block:40px 56px;color:var(--dim)
 <script>
 /* ===== НАСТРОЙКИ ===== */
 // Supabase: Project Settings → API. Пусто = демо-режим без ИИ и без списка ожидания.
-const SUPABASE_URL = "";      // https://xxxx.supabase.co
-const SUPABASE_ANON_KEY = ""; // публичный anon key (его можно хранить в коде сайта)
-const API_URL = SUPABASE_URL ? SUPABASE_URL + "/functions/v1/analyze" : "";
+const SUPABASE_URL = "https://qxdmdwfdfohxwahvudtx.supabase.co";
+const SUPABASE_ANON_KEY = "sb_publishable_FOprr4Gq2Srwl7YRywp-1Q_CvaGv8gH"; // публичный ключ, его можно хранить в коде сайта
+const AI_ENABLED = false;     // включи (true), когда добавишь ANTHROPIC_API_KEY в Supabase → Edge Functions → Secrets
+const API_URL = SUPABASE_URL && AI_ENABLED ? SUPABASE_URL + "/functions/v1/analyze" : "";
 const CTA_URL = "#";          // запасная ссылка, если Supabase не подключён
 const SCAN_MS = 30000;       // длительность анализа
 const PSL_MIN = 3.8, PSL_MAX = 4.7;
@@ -725,7 +726,7 @@ async function run(){
 }
 
 function sbHeaders(){
-  return {"Content-Type":"application/json", "apikey":SUPABASE_ANON_KEY, "Authorization":"Bearer " + SUPABASE_ANON_KEY};
+  return {"Content-Type":"application/json", "apikey":SUPABASE_ANON_KEY};
 }
 
 async function joinWaitlist(e){
