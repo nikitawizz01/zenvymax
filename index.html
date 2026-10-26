@@ -1,0 +1,849 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>ZenvyMax</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<meta name="description" content="ZenvyMax — разбор лица по шкале PSL и персональный план softmaxxing.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Unbounded:wght@500;700&family=Onest:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<style>
+/* Layout: лабораторный отчёт на чёрном — левое редакционное выравнивание, сканер превращается в протокол измерений */
+:root{
+  --bg:#070405;
+  --surface:#110809;
+  --surface-2:#1a0c0e;
+  --line:#2b1416;
+  --fg:#f4ebe9;
+  --muted:#a08e8c;
+  --dim:#6a5654;
+  --red:#d71f2f;
+  --red-hi:#ff4a4a;
+  --red-deep:#4a0710;
+  --ok:#d9c7b8;
+  --display:"Unbounded","Arial Black",system-ui,sans-serif;
+  --body:"Onest","Segoe UI",system-ui,-apple-system,sans-serif;
+  --mono:"IBM Plex Mono",ui-monospace,"SFMono-Regular",Menlo,monospace;
+  color-scheme:dark;
+}
+*{box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{background:var(--bg);color:var(--fg);font:16px/1.55 var(--body);-webkit-font-smoothing:antialiased;overflow-x:hidden}
+@media (prefers-reduced-motion:reduce){html{scroll-behavior:auto}*{animation:none!important;transition:none!important}}
+a{color:inherit}
+:focus-visible{outline:2px solid var(--red-hi);outline-offset:3px;border-radius:4px}
+.wrap{max-width:1160px;margin:0 auto;padding-left:max(20px,env(safe-area-inset-left,0px));padding-right:max(20px,env(safe-area-inset-right,0px))}
+.mono{font-family:var(--mono);font-variant-numeric:tabular-nums}
+.eyebrow{font:500 12px/1 var(--mono);letter-spacing:.16em;text-transform:uppercase;color:var(--red-hi)}
+h1,h2,h3{text-wrap:balance;margin:0}
+h2{font:700 clamp(28px,4.2vw,44px)/1.08 var(--display);letter-spacing:-.02em;text-transform:uppercase}
+p{margin:0}
+
+/* фон: тяжёлый красный свет сверху и зерно */
+.glow{position:absolute;inset:0 0 auto;height:980px;pointer-events:none;z-index:0;
+  background:
+   radial-gradient(60% 55% at 78% 8%,rgba(215,31,47,.42),transparent 70%),
+   radial-gradient(45% 40% at 8% 30%,rgba(120,8,20,.45),transparent 70%),
+   linear-gradient(180deg,#14070a 0%,var(--bg) 85%)}
+.grain{position:fixed;inset:0;pointer-events:none;z-index:50;opacity:.07;mix-blend-mode:overlay;
+  background-image:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='160' height='160'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='2' stitchTiles='stitch'/></filter><rect width='100%' height='100%' filter='url(%23n)'/></svg>")}
+
+/* nav */
+nav{position:relative;z-index:2;display:flex;align-items:center;justify-content:space-between;gap:16px;padding-block:22px}
+.logo{font:700 18px/1 var(--display);letter-spacing:.32em;text-decoration:none}
+.logo b{color:var(--red-hi)}
+.nav-links{display:flex;gap:26px;font-size:14px;color:var(--muted)}
+.nav-links a{text-decoration:none}
+.nav-links a:hover{color:var(--fg)}
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:10px;border:0;cursor:pointer;text-decoration:none;
+  font:600 15px/1 var(--body);padding:16px 24px;border-radius:999px;transition:transform .15s,background .2s,box-shadow .2s}
+.btn-red{background:linear-gradient(135deg,var(--red-hi),var(--red) 55%,#8e0f1c);color:#fff;box-shadow:0 10px 40px -10px rgba(255,60,60,.6)}
+.btn-red:hover{transform:translateY(-1px);box-shadow:0 14px 50px -10px rgba(255,60,60,.8)}
+.btn-ghost{background:transparent;color:var(--fg);border:1px solid var(--line)}
+.btn-ghost:hover{border-color:var(--red)}
+.btn:disabled{opacity:.35;cursor:not-allowed;transform:none}
+.btn-sm{padding:11px 18px;font-size:14px}
+.nav-right{display:flex;align-items:center;gap:12px}
+.lang{display:inline-flex;border:1px solid var(--line);border-radius:999px;padding:3px;background:rgba(7,4,5,.5)}
+.lang button{border:0;background:transparent;color:var(--muted);font:500 12px/1 var(--mono);letter-spacing:.08em;padding:8px 11px;border-radius:999px;cursor:pointer}
+.lang button[aria-pressed="true"]{background:var(--red);color:#fff}
+.btn-xl{padding:22px 44px;font-size:18px;min-width:300px}
+
+/* hero */
+.hero{position:relative;z-index:1;display:grid;grid-template-columns:1.15fr .85fr;gap:56px;align-items:center;padding-block:56px 96px}
+.hero h1{font:700 clamp(38px,6.4vw,80px)/.98 var(--display);letter-spacing:-.035em;text-transform:uppercase;margin:22px 0 24px}
+.hero h1 em{font-style:normal;background:linear-gradient(100deg,#ff6a5c,var(--red) 60%,#7d0b17);-webkit-background-clip:text;background-clip:text;color:transparent}
+.hero .lead{font-size:clamp(17px,1.6vw,19px);color:var(--muted);max-width:520px}
+.hero .lead b{color:var(--fg);font-weight:500}
+.hero-cta{display:flex;flex-wrap:wrap;gap:12px;margin-top:34px}
+.hero-meta{display:flex;flex-wrap:wrap;gap:22px;margin-top:34px;font:400 13px/1.4 var(--mono);color:var(--dim)}
+.hero-meta span::before{content:"— ";color:var(--red)}
+
+/* пример отчёта */
+.sample{position:relative;background:linear-gradient(160deg,rgba(40,10,14,.9),rgba(12,5,6,.95));border:1px solid var(--line);border-radius:28px;padding:26px;
+  box-shadow:0 40px 120px -40px rgba(215,31,47,.55)}
+.sample-tag{position:absolute;top:-11px;left:24px;background:var(--bg);border:1px solid var(--line);border-radius:99px;padding:4px 12px;font:500 11px/1.4 var(--mono);letter-spacing:.12em;color:var(--muted);text-transform:uppercase}
+.sample-top{display:flex;justify-content:space-between;align-items:flex-start;gap:12px}
+.psl-big{font:700 76px/1 var(--display);letter-spacing:-.04em}
+.psl-big small{font:500 16px/1 var(--mono);color:var(--dim);letter-spacing:0;margin-left:6px}
+.tier{display:inline-block;font:600 13px/1 var(--mono);letter-spacing:.1em;padding:8px 12px;border-radius:8px;background:rgba(215,31,47,.16);color:#ff8a80;border:1px solid rgba(255,74,74,.3)}
+.rows{margin-top:22px;border-top:1px solid var(--line)}
+.row{display:flex;justify-content:space-between;gap:12px;padding:11px 0;border-bottom:1px solid var(--line);font-size:14px}
+.row span:first-child{color:var(--muted)}
+.row .mono{color:var(--fg)}
+.flag{margin-top:18px;display:flex;gap:12px;align-items:flex-start;font-size:14px;color:var(--muted)}
+.flag i{flex:none;width:8px;height:8px;margin-top:7px;border-radius:50%;background:var(--red-hi);box-shadow:0 0 12px var(--red-hi)}
+.flag b{color:var(--fg);font-weight:500}
+
+section{position:relative;z-index:1}
+.sec{padding-block:96px;border-top:1px solid var(--line)}
+.sec-head{display:grid;grid-template-columns:1fr 1fr;gap:40px;align-items:end;margin-bottom:52px}
+.sec-head p{color:var(--muted);max-width:460px}
+
+/* шаги */
+.steps{display:grid;grid-template-columns:repeat(3,1fr);gap:0;border:1px solid var(--line);border-radius:24px;overflow:hidden}
+.step{padding:32px 28px;min-width:0}
+.step+.step{border-left:1px solid var(--line)}
+.step .n{font:500 13px/1 var(--mono);color:var(--red-hi)}
+.step h3{font:600 21px/1.25 var(--body);margin:18px 0 10px}
+.step p{color:var(--muted);font-size:15px}
+
+/* шкала */
+.ladder{position:relative;margin-top:8px}
+.ladder-bar{display:grid;grid-template-columns:repeat(5,1fr);gap:4px}
+.lvl{padding:18px 16px 16px;border-radius:14px;background:var(--surface);border:1px solid var(--line);min-width:0}
+.lvl .code{font:700 18px/1 var(--display);letter-spacing:-.01em}
+.lvl .rng{font:400 12px/1 var(--mono);color:var(--dim);margin-top:10px}
+.lvl p{font-size:13px;color:var(--muted);margin-top:12px;line-height:1.45}
+.lvl.hot{background:linear-gradient(180deg,rgba(215,31,47,.22),rgba(215,31,47,.04));border-color:rgba(255,74,74,.35)}
+.lvl.hot .code{color:#ff8a80}
+.scale-note{margin-top:22px;font-size:14px;color:var(--dim);max-width:640px}
+
+/* сканер */
+.scanner{display:grid;grid-template-columns:420px 1fr;gap:28px;align-items:start}
+.panel{background:var(--surface);border:1px solid var(--line);border-radius:26px;padding:24px;min-width:0}
+.drop{position:relative;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:10px;aspect-ratio:4/5;width:100%;max-width:100%;
+  border:1.5px dashed #4a2226;border-radius:18px;cursor:pointer;overflow:hidden;color:var(--muted);text-align:center;background:
+  radial-gradient(60% 50% at 50% 40%,rgba(215,31,47,.10),transparent 70%)}
+.drop:hover{border-color:var(--red)}
+.drop.drag{border-color:var(--red-hi);background:rgba(215,31,47,.08)}
+.drop .plus{width:54px;height:54px;border-radius:50%;display:grid;place-items:center;border:1px solid var(--line);font:400 28px/1 var(--body);color:var(--fg)}
+.drop small{font:400 12px/1.4 var(--mono);color:var(--dim)}
+.drop img,.drop svg.overlay,.drop canvas{position:absolute;inset:0;width:100%;height:100%}
+.drop img{object-fit:cover}
+.drop.has .ph-ui{display:none}
+.overlay{pointer-events:none}
+.overlay line,.overlay path{stroke:rgba(255,90,90,.75);stroke-width:1;fill:none;vector-effect:non-scaling-stroke}
+.overlay .dash{stroke-dasharray:4 5;stroke:rgba(255,255,255,.35)}
+.overlay circle{fill:var(--red-hi)}
+.beam{position:absolute;left:0;right:0;height:2px;top:0;background:var(--red-hi);box-shadow:0 0 24px 6px rgba(255,74,74,.55);display:none}
+.scanning .beam{display:block;animation:beam 2.2s ease-in-out infinite}
+@keyframes beam{0%{top:3%}50%{top:96%}100%{top:3%}}
+.scanning img{filter:grayscale(.55) contrast(1.08) brightness(.85)}
+.ov-el{opacity:0;transition:opacity .5s}
+.ov-el.on{opacity:1}
+.checks{display:flex;flex-direction:column;gap:10px;margin:18px 0}
+.chk{display:flex;gap:10px;align-items:flex-start;font-size:13px;color:var(--muted);cursor:pointer}
+.chk input{accent-color:var(--red);margin-top:3px;width:16px;height:16px;flex:none}
+.chk a{color:var(--fg)}
+.panel .btn{width:100%}
+.err{margin-top:12px;font-size:13px;color:#ff8a80;min-height:1em}
+
+/* правая колонка: состояния */
+.state-idle h3{font:700 26px/1.15 var(--display);text-transform:uppercase;letter-spacing:-.01em}
+.state-idle p{color:var(--muted);margin-top:14px;max-width:440px}
+.tips{margin-top:26px;display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.tip{border:1px solid var(--line);border-radius:14px;padding:14px 16px;font-size:14px;color:var(--muted)}
+.tip b{display:block;color:var(--fg);font-weight:500;margin-bottom:2px}
+
+.log{font:400 14px/1.4 var(--mono);display:flex;flex-direction:column;gap:9px;margin-top:18px}
+.log div{display:flex;gap:12px;color:var(--dim);transition:color .3s}
+.log div.done{color:var(--fg)}
+.log div.cur{color:#ff8a80}
+.log div b{font-weight:400;width:46px;flex:none}
+.pct{font:700 64px/1 var(--display);letter-spacing:-.04em}
+.pbar{height:3px;background:var(--line);border-radius:3px;margin-top:16px;overflow:hidden}
+.pbar i{display:block;height:100%;width:0;background:linear-gradient(90deg,var(--red),var(--red-hi));transition:width .2s linear}
+
+/* отчёт */
+.demo-chip{display:inline-block;font:500 11px/1.4 var(--mono);letter-spacing:.08em;text-transform:uppercase;color:var(--muted);border:1px dashed var(--line);border-radius:6px;padding:5px 9px;margin-bottom:16px}
+.res-top{display:flex;flex-wrap:wrap;align-items:flex-end;gap:18px 28px}
+.res-top .psl-big{font-size:96px}
+.res-sub{color:var(--muted);margin-top:10px;max-width:520px}
+.meter{position:relative;margin-top:28px;height:10px;border-radius:10px;background:linear-gradient(90deg,#2a1214,#5a0d16 40%,var(--red) 75%,#ff6a5c)}
+.meter .pin{position:absolute;top:-7px;width:3px;height:24px;background:#fff;border-radius:2px;box-shadow:0 0 14px #fff;transition:left 1s cubic-bezier(.2,.8,.2,1)}
+.meter-lbl{position:relative;height:14px;font:400 11px/1 var(--mono);color:var(--dim);margin-top:10px}
+.meter-lbl span{position:absolute;transform:translateX(-50%);white-space:nowrap}
+.meter-lbl span:last-child{transform:translateX(-100%)}
+.h-sm{font:500 12px/1 var(--mono);letter-spacing:.16em;text-transform:uppercase;color:var(--dim);margin:40px 0 14px}
+.metrics{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
+.metric{background:var(--surface-2);border:1px solid var(--line);border-radius:14px;padding:14px 16px;min-width:0}
+.metric .k{font-size:12px;color:var(--muted)}
+.metric .v{font:500 20px/1.2 var(--mono);margin-top:6px}
+.metric .s{font:400 11px/1.3 var(--mono);color:var(--dim);margin-top:4px}
+.metric .s.good{color:var(--ok)}
+.metric .s.bad{color:#ff8a80}
+.finding{border:1px solid var(--line);border-radius:18px;padding:20px 22px;background:var(--surface);margin-bottom:10px}
+.f-head{display:flex;gap:14px;align-items:flex-start;justify-content:space-between;flex-wrap:wrap}
+.f-head h4{margin:0;font:600 18px/1.3 var(--body);display:flex;gap:12px;align-items:baseline}
+.f-head h4 .no{font:500 13px/1 var(--mono);color:var(--red-hi)}
+.sev{font:500 11px/1 var(--mono);letter-spacing:.08em;text-transform:uppercase;padding:6px 9px;border-radius:6px;border:1px solid}
+.sev.high{color:#ff8a80;border-color:rgba(255,74,74,.45);background:rgba(215,31,47,.14)}
+.sev.mid{color:#e8b7a8;border-color:#4a2a28}
+.sev.low{color:var(--muted);border-color:var(--line)}
+.f-obs{color:var(--muted);margin-top:10px;font-size:15px}
+.f-obs .mono{color:var(--fg);font-size:13px}
+.f-do{list-style:none;padding:0;margin:14px 0 0;display:flex;flex-direction:column;gap:8px}
+.f-do li{display:flex;gap:10px;font-size:15px}
+.f-do li::before{content:"→";color:var(--red-hi);font-family:var(--mono)}
+.strong{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.strong div{border:1px solid var(--line);border-radius:14px;padding:14px 16px;font-size:14px;color:var(--muted)}
+.strong b{display:block;color:var(--fg);font-weight:500}
+.verdict{margin-top:30px;padding:24px;border-radius:20px;background:linear-gradient(135deg,rgba(215,31,47,.20),rgba(215,31,47,.03));border:1px solid rgba(255,74,74,.25)}
+.verdict p{font-size:17px}
+.verdict .act{display:flex;flex-wrap:wrap;gap:10px;margin-top:20px}
+.wl{margin-top:20px}
+.wl-l{display:block;font-size:14px;color:var(--muted);margin-bottom:10px}
+.wl-row{display:flex;flex-wrap:wrap;gap:8px}
+.wl-row input{flex:1 1 220px;min-width:0;background:var(--bg);border:1px solid var(--line);border-radius:999px;color:var(--fg);font:400 15px/1 var(--body);padding:15px 20px}
+.wl-row input:focus{outline:none;border-color:var(--red-hi)}
+.panel .wl-row .btn{width:auto;flex:1 1 auto}
+.wl-ok{margin-top:20px;font-weight:500;color:#ff8a80}
+.panel .verdict .btn{width:auto}
+
+/* без вреда */
+.nope{display:grid;grid-template-columns:repeat(4,1fr);gap:8px}
+.nope div{border:1px solid var(--line);border-radius:16px;padding:18px;min-width:0}
+.nope b{display:block;font-weight:600;text-decoration:line-through;text-decoration-color:var(--red-hi);text-decoration-thickness:2px}
+.nope span{display:block;font-size:14px;color:var(--muted);margin-top:8px}
+
+/* faq + legal */
+details{border-bottom:1px solid var(--line)}
+summary{list-style:none;cursor:pointer;display:flex;justify-content:space-between;gap:20px;padding:22px 0;font-weight:500;font-size:17px}
+summary::-webkit-details-marker{display:none}
+summary::after{content:"+";font:400 22px/1 var(--mono);color:var(--red-hi);transition:transform .2s}
+details[open] summary::after{transform:rotate(45deg)}
+.dd{padding:0 0 24px;color:var(--muted);max-width:760px;font-size:15px}
+.dd p+p,.dd h4+p,.dd p+h4{margin-top:12px}
+.dd h4{color:var(--fg);font:600 15px/1.3 var(--body);margin:20px 0 0}
+.dd ul{margin:10px 0 0;padding-left:18px}
+.dd li{margin:4px 0}
+.legal-head{display:flex;justify-content:space-between;align-items:baseline;flex-wrap:wrap;gap:12px}
+.legal-head .mono{font-size:12px;color:var(--dim)}
+
+footer{border-top:1px solid var(--line);padding-block:40px 56px;color:var(--dim);font-size:13px;position:relative;z-index:1}
+.foot{display:flex;flex-wrap:wrap;justify-content:space-between;gap:20px}
+.foot nav{padding:0;gap:22px;display:flex;flex-wrap:wrap}
+.foot a{color:var(--muted);text-decoration:none}
+.foot a:hover{color:var(--fg)}
+
+@media (max-width:960px){
+  .hero{grid-template-columns:1fr;gap:56px;padding-block:28px 72px}
+  .scanner{grid-template-columns:1fr}
+  .sec-head{grid-template-columns:1fr;gap:16px}
+  .ladder-bar{grid-template-columns:1fr 1fr}
+  .ladder-bar .lvl:last-child{grid-column:span 2}
+  .nope{grid-template-columns:1fr 1fr}
+}
+@media (max-width:640px){
+  .nav-links,.nav-cta{display:none}
+  nav{justify-content:space-between}
+  .hero>div:first-child{text-align:center}
+  .hero .lead{margin-inline:auto}
+  .hero h1{font-size:clamp(34px,10.5vw,48px)}
+  .hero-cta{justify-content:center}
+  .btn-xl{width:100%;min-width:0;padding:24px 20px;font-size:19px}
+  .hero-meta{justify-content:center;gap:16px}
+  .steps{grid-template-columns:1fr}
+  .step+.step{border-left:0;border-top:1px solid var(--line)}
+  .metrics{grid-template-columns:1fr 1fr}
+  .tips,.strong{grid-template-columns:1fr}
+  .sec{padding-block:72px}
+  .res-top .psl-big{font-size:76px}
+  .psl-big{font-size:64px}
+}
+</style>
+</head>
+<body>
+<div class="grain" aria-hidden="true"></div>
+<div class="glow" aria-hidden="true"></div>
+
+<div class="wrap">
+  <nav>
+    <a class="logo" href="#top" id="top">ZENVY<b>MAX</b></a>
+    <div class="nav-links">
+      <a href="#how" data-i18n="nav_how">Как работает</a>
+      <a href="#scale" data-i18n="nav_scale">Шкала PSL</a>
+      <a href="#faq" data-i18n="nav_faq">Вопросы</a>
+    </div>
+    <div class="nav-right">
+      <div class="lang" role="group" aria-label="Language">
+        <button type="button" id="lang-ru" data-lang="ru">RU</button>
+        <button type="button" id="lang-en" data-lang="en">EN</button>
+      </div>
+      <a class="btn btn-ghost btn-sm nav-cta" href="#scan" data-i18n="nav_cta">Пройти скан</a>
+    </div>
+  </nav>
+
+  <header class="hero">
+    <div>
+      <div class="eyebrow">Face analysis · softmaxxing</div>
+      <h1 data-i18n="hero_h1">Узнай свой PSL.<br><em>Подними его.</em></h1>
+      <p class="lead" data-i18n="hero_lead">Загрузи фото анфас. За 30 секунд ИИ разберёт пропорции, кожу, глаза, линию челюсти и причёску, а потом <b>по пунктам скажет, что исправить первым.</b></p>
+      <div class="hero-cta">
+        <a class="btn btn-red btn-xl" href="#scan" data-i18n="hero_cta">Сканировать лицо</a>
+      </div>
+      <div class="hero-meta"><span data-i18n="meta1">30 секунд</span><span data-i18n="meta2">8 параметров</span><span data-i18n="meta3">только 18+</span></div>
+    </div>
+
+    <aside class="sample">
+      <div class="sample-tag" data-i18n="sample_tag">Пример отчёта</div>
+      <div class="sample-top">
+        <div>
+          <div class="eyebrow" style="color:var(--dim)">PSL score</div>
+          <div class="psl-big">4.4<small>/ 8</small></div>
+        </div>
+        <span class="tier">HTN</span>
+      </div>
+      <div class="rows">
+        <div class="row"><span data-i18n="m_canthal">Кантальный наклон</span><span class="mono">+4.1°</span></div>
+        <div class="row"><span>FWHR</span><span class="mono">1.89</span></div>
+        <div class="row"><span data-i18n="m_thirds">Трети лица</span><span class="mono">32 / 35 / 33</span></div>
+        <div class="row"><span data-i18n="m_sym">Симметрия</span><span class="mono">91%</span></div>
+      </div>
+      <div class="flag"><i></i><div data-i18n="sample_flag"><b>Приоритет №1: отёчность нижней трети.</b> Скрывает линию челюсти. Решается за 10–14 дней.</div></div>
+    </aside>
+  </header>
+</div>
+
+<section class="sec" id="how">
+  <div class="wrap">
+    <div class="sec-head">
+      <h2 data-i18n="how_h">Три шага</h2>
+      <p data-i18n="how_p">Никаких анкет. Фото, разбор, план. Каждый пункт отчёта заканчивается конкретным действием.</p>
+    </div>
+    <div class="steps">
+      <div class="step"><div class="n">01</div><h3 data-i18n="s1_h">Фото анфас</h3><p data-i18n="s1_p">Дневной свет, без фильтров, лоб и скулы открыты. Фото не сохраняется.</p></div>
+      <div class="step"><div class="n">02</div><h3 data-i18n="s2_h">Разбор за 30 секунд</h3><p data-i18n="s2_p">PSL, уровень по шкале, замеры и список зон роста с приоритетом.</p></div>
+      <div class="step"><div class="n">03</div><h3 data-i18n="s3_h">План действий</h3><p data-i18n="s3_p">Что делать с отёчностью, кожей, причёской и осанкой. Без операций и «бонсмэшинга».</p></div>
+    </div>
+  </div>
+</section>
+
+<section class="sec" id="scale">
+  <div class="wrap">
+    <div class="sec-head">
+      <h2 data-i18n="scale_h">Шкала PSL</h2>
+      <p data-i18n="scale_p">Рейтинг из лукс-максинг комьюнити, от 1 до 8. Большинство людей находится в диапазоне Normie. Мы показываем, где ты сейчас и куда реально подняться.</p>
+    </div>
+    <div class="ladder">
+      <div class="ladder-bar">
+        <div class="lvl"><div class="code">LTN</div><div class="rng">3.25 – 3.75</div><p data-i18n="l1">Low-tier normie. Обычно мешают кожа и отёчность.</p></div>
+        <div class="lvl hot"><div class="code">MTN</div><div class="rng">3.75 – 4.25</div><p data-i18n="l2">Mid-tier normie. Средний уровень, самый быстрый рост.</p></div>
+        <div class="lvl hot"><div class="code">HTN</div><div class="rng">4.25 – 4.75</div><p data-i18n="l3">High-tier normie. Выше среднего, нужна шлифовка.</p></div>
+        <div class="lvl"><div class="code">Chadlite</div><div class="rng">4.75 – 5.5</div><p data-i18n="l4">Сильная структура плюс уход.</p></div>
+        <div class="lvl"><div class="code">Chad</div><div class="rng">5.5+</div><p data-i18n="l5">Редкость. Модельная внешность.</p></div>
+      </div>
+      <p class="scale-note" data-i18n="scale_note">PSL оценивает гармонию черт, пропорции, выраженность скул и челюсти. Это ориентир для работы над собой, а не объективная мера твоей ценности.</p>
+    </div>
+  </div>
+</section>
+
+<section class="sec" id="scan">
+  <div class="wrap">
+    <div class="sec-head">
+      <h2 data-i18n="scan_h">Скан лица</h2>
+      <p data-i18n="scan_p">Фото обрабатывается для анализа и не сохраняется. Результат остаётся только на твоём устройстве.</p>
+    </div>
+
+    <div class="scanner">
+      <div class="panel">
+        <label class="drop" id="drop" for="file">
+          <div class="ph-ui plus" aria-hidden="true">+</div>
+          <div class="ph-ui" data-i18n="drop1">Загрузи или перетащи фото</div>
+          <small class="ph-ui" data-i18n="drop2">JPG / PNG · анфас · без фильтров</small>
+          <div class="beam"></div>
+        </label>
+        <input type="file" id="file" accept="image/*" hidden>
+        <div class="checks">
+          <label class="chk"><input type="checkbox" id="age"> <span data-i18n="chk_age">Мне есть 18 лет</span></label>
+          <label class="chk"><input type="checkbox" id="agree"> <span data-i18n="chk_agree">Я принимаю <a href="#terms" data-open="terms">условия</a> и <a href="#privacy" data-open="privacy">политику конфиденциальности</a></span></label>
+        </div>
+        <button class="btn btn-red" id="go" disabled data-i18n="go">Начать анализ</button>
+        <div class="err" id="err" role="status"></div>
+      </div>
+
+      <div class="panel" id="out" aria-live="polite">
+        <div class="state-idle" id="idle">
+          <div class="eyebrow" data-i18n="idle_e">Ожидание фото</div>
+          <h3 style="margin-top:16px" data-i18n="idle_h">Отчёт появится здесь</h3>
+          <p data-i18n="idle_p">Чем лучше фото, тем точнее разбор. Четыре правила:</p>
+          <div class="tips">
+            <div class="tip" data-i18n="tip1"><b>Анфас</b>Смотри прямо в камеру, голова ровно</div>
+            <div class="tip" data-i18n="tip2"><b>Свет</b>Дневной, спереди, без резких теней</div>
+            <div class="tip" data-i18n="tip3"><b>Без фильтров</b>Сглаживание кожи ломает анализ</div>
+            <div class="tip" data-i18n="tip4"><b>Открытое лицо</b>Волосы не закрывают лоб и скулы</div>
+          </div>
+        </div>
+        <div id="run" hidden>
+          <div class="eyebrow" data-i18n="run_e">Анализ</div>
+          <div class="pct mono" id="pct" style="margin-top:16px">0%</div>
+          <div class="pbar"><i id="pbar"></i></div>
+          <div class="log" id="log"></div>
+        </div>
+        <div id="res" hidden></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="sec">
+  <div class="wrap">
+    <div class="sec-head">
+      <h2 data-i18n="no_h">Чего здесь нет</h2>
+      <p data-i18n="no_p">В TikTok много советов, которые калечат. Мы работаем только с тем, что безопасно и даёт результат: кожа, отёчность, волосы, осанка, тело.</p>
+    </div>
+    <div class="nope">
+      <div data-i18n="no1"><b>Bonesmashing</b><span>Удары по лицу не меняют кость. Они дают травмы и асимметрию.</span></div>
+      <div data-i18n="no2"><b>Стероиды</b><span>Гормональный сбой, акне, выпадение волос.</span></div>
+      <div data-i18n="no3"><b>Mewing как панацея</b><span>Поза языка полезна, но челюсть взрослого не перестроит.</span></div>
+      <div data-i18n="no4"><b>Голодовки</b><span>Чёткость лица даёт умеренный процент жира, а не истощение.</span></div>
+    </div>
+  </div>
+</section>
+
+<section class="sec" id="faq">
+  <div class="wrap">
+    <div class="sec-head"><h2 data-i18n="faq_h">Вопросы</h2><p></p></div>
+    <details><summary data-i18n="q1">Насколько точна оценка?</summary><div class="dd" data-i18n="a1"><p>Это алгоритмическая оценка по одному фото. Свет, угол и камера влияют на результат. Используй её как ориентир и сравнивай себя с собой: одинаковый свет, одинаковый ракурс, раз в 2 недели.</p></div></details>
+    <details><summary data-i18n="q2">Можно ли поднять PSL без операций?</summary><div class="dd" data-i18n="a2"><p>Кость без хирургии не меняется. Но PSL на фото сильно зависит от отёчности, кожи, процента жира, причёски, бровей и осанки шеи. Здесь реальный рост за 4–8 недель.</p></div></details>
+    <details><summary data-i18n="q3">Сохраняете ли вы фото?</summary><div class="dd" data-i18n="a3"><p>Нет. Фото уменьшается в браузере, отправляется на анализ и удаляется после ответа. Отчёт хранится только в твоём браузере.</p></div></details>
+    <details><summary data-i18n="q4">Почему только 18+?</summary><div class="dd" data-i18n="a4"><p>Лицо подростка ещё формируется, и оценка внешности в этом возрасте больше вредит, чем помогает. Если на фото человек младше 18, анализ не проводится.</p></div></details>
+  </div>
+</section>
+
+<section class="sec" id="legal">
+  <div class="wrap">
+    <div class="sec-head"><h2 data-i18n="legal_h">Документы</h2><p data-i18n="legal_p">Коротко и по делу. Последнее обновление: 26.10.2026.</p></div>
+
+    <details id="terms"><summary data-i18n="terms_h">Условия использования</summary><div class="dd" data-i18n="terms">
+      <p>Используя сайт ZenvyMax («Сервис»), ты соглашаешься с этими условиями. Если не согласен, не используй Сервис.</p>
+      <h4>1. Кто может пользоваться</h4>
+      <p>Сервис предназначен только для лиц от 18 лет. Загружая фото, ты подтверждаешь, что тебе есть 18 лет и что на фото изображён ты сам. Загружать фото других людей без их согласия запрещено.</p>
+      <h4>2. Что такое оценка</h4>
+      <p>PSL-оценка, уровень по шкале и замеры являются автоматической оценкой по одному изображению. Шкала откалибрована в мягкую сторону. Оценка не является объективной мерой привлекательности, медицинским заключением или рекомендацией врача.</p>
+      <h4>3. Не медицинская консультация</h4>
+      <p>Советы носят общий информационный характер. При проблемах с кожей, отёками, болью в челюсти или других симптомах обратись к врачу. Не выполняй упражнения, если они вызывают боль.</p>
+      <h4>4. Запрещено</h4>
+      <ul><li>загружать фото несовершеннолетних;</li><li>загружать фото других людей без согласия;</li><li>использовать результаты для травли или унижения;</li><li>пытаться нарушить работу Сервиса.</li></ul>
+      <h4>5. Ранний доступ</h4>
+      <p>Сервис работает в режиме раннего доступа и предоставляется «как есть». Мы можем менять функции, условия и цены, предупредив об этом на сайте.</p>
+      <h4>6. Ответственность</h4>
+      <p>В пределах, разрешённых законом, мы не отвечаем за решения, принятые на основе оценки, и за косвенный ущерб от использования Сервиса.</p>
+      <h4>7. Контакты</h4>
+      <p>[Имя или название компании], [email для связи]. Применимое право: законодательство Республики Польша.</p>
+    </div></details>
+
+    <details id="privacy"><summary data-i18n="privacy_h">Политика конфиденциальности</summary><div class="dd" data-i18n="privacy">
+      <p>Оператор данных: [Имя или название компании], [адрес], [email]. Мы обрабатываем данные в соответствии с GDPR (RODO).</p>
+      <h4>Какие данные</h4>
+      <ul><li><b>Фото лица.</b> Уменьшается в браузере и передаётся на анализ. Не сохраняется на наших серверах и удаляется сразу после получения результата.</li><li><b>Результат анализа.</b> Хранится только в памяти твоего браузера (localStorage). Ты можешь удалить его кнопкой «Удалить отчёт» или очисткой данных сайта.</li><li><b>Email.</b> Только если ты сам оставишь его в списке раннего доступа. Хранится в базе данных (Supabase, ЕС) до отзыва согласия, используется только для писем о ZenvyMax.</li><li><b>Технические данные.</b> IP-адрес и сведения о браузере, которые хостинг сохраняет в журналах для безопасности.</li></ul>
+      <h4>Зачем</h4>
+      <p>Только чтобы выдать отчёт по твоему запросу. Основание: твоё согласие (ст. 6(1)(a) и ст. 9(2)(a) GDPR). Мы не используем фото для идентификации личности, обучения моделей, рекламы и не продаём данные.</p>
+      <h4>Кому передаются</h4>
+      <p>Для анализа изображение передаётся поставщику ИИ-модели (Anthropic, PBC) по защищённому соединению. Поставщик обрабатывает его от нашего имени. Возможна передача за пределы ЕЭЗ на основании стандартных договорных условий.</p>
+      <h4>Твои права</h4>
+      <p>Ты можешь отозвать согласие, запросить доступ, исправление или удаление данных, ограничить обработку и подать жалобу в Управление по защите персональных данных (UODO, Польша). Пиши на [email].</p>
+      <h4>Cookies</h4>
+      <p>Сайт не использует рекламные и аналитические cookies. Локальное хранилище используется только для сохранения твоего отчёта и выбранного языка.</p>
+    </div></details>
+
+    <details id="disclaimer"><summary data-i18n="disc_h">Отказ от ответственности</summary><div class="dd" data-i18n="disc">
+      <p>ZenvyMax не является медицинским сервисом. Оценки и советы не заменяют консультацию дерматолога, стоматолога, ортодонта или психолога. Если мысли о внешности мешают жить, это повод поговорить со специалистом, а не поднимать PSL.</p>
+    </div></details>
+  </div>
+</section>
+
+<footer>
+  <div class="wrap foot">
+    <div data-i18n="foot">© 2026 ZenvyMax · ранний доступ</div>
+    <nav>
+      <a href="#terms" data-open="terms" data-i18n="terms_h">Условия использования</a>
+      <a href="#privacy" data-open="privacy" data-i18n="privacy_h">Политика конфиденциальности</a>
+      <a href="#disclaimer" data-open="disclaimer" data-i18n="disc_h">Отказ от ответственности</a>
+    </nav>
+  </div>
+</footer>
+
+<script>
+/* ===== НАСТРОЙКИ ===== */
+// Supabase: Project Settings → API. Пусто = демо-режим без ИИ и без списка ожидания.
+const SUPABASE_URL = "";      // https://xxxx.supabase.co
+const SUPABASE_ANON_KEY = ""; // публичный anon key (его можно хранить в коде сайта)
+const API_URL = SUPABASE_URL ? SUPABASE_URL + "/functions/v1/analyze" : "";
+const CTA_URL = "#";          // запасная ссылка, если Supabase не подключён
+const SCAN_MS = 30000;       // длительность анализа
+const PSL_MIN = 3.8, PSL_MAX = 4.7;
+
+const $ = id => document.getElementById(id);
+let photo = null, lang = "ru", report = null;
+
+/* ===== ПЕРЕВОДЫ: статичные блоки (русский берётся из HTML) ===== */
+const EN = {
+  nav_how:"How it works", nav_scale:"PSL scale", nav_faq:"FAQ", nav_cta:"Take the scan",
+  hero_h1:"Know your PSL.<br><em>Raise it.</em>",
+  hero_lead:"Upload a front-facing photo. In 30 seconds the AI breaks down your proportions, skin, eyes, jawline and hair, then <b>tells you point by point what to fix first.</b>",
+  hero_cta:"Scan my face", meta1:"30 seconds", meta2:"8 parameters", meta3:"18+ only",
+  sample_tag:"Sample report", m_canthal:"Canthal tilt", m_thirds:"Facial thirds", m_sym:"Symmetry",
+  sample_flag:"<b>Priority #1: lower-third bloating.</b> It hides the jawline. Fixable in 10–14 days.",
+  how_h:"Three steps", how_p:"No questionnaires. Photo, breakdown, plan. Every point in the report ends with a concrete action.",
+  s1_h:"Front-facing photo", s1_p:"Daylight, no filters, forehead and cheekbones visible. The photo is not stored.",
+  s2_h:"30-second breakdown", s2_p:"PSL, tier on the scale, measurements and a prioritised list of growth areas.",
+  s3_h:"Action plan", s3_p:"What to do about bloating, skin, hair and posture. No surgery, no bonesmashing.",
+  scale_h:"PSL scale", scale_p:"A rating from the looksmaxxing community, from 1 to 8. Most people sit in the Normie range. We show where you are now and how far you can realistically climb.",
+  l1:"Low-tier normie. Usually held back by skin and bloating.", l2:"Mid-tier normie. Average, with the fastest room to grow.",
+  l3:"High-tier normie. Above average, needs fine-tuning.", l4:"Strong bone structure plus grooming.", l5:"Rare. Model-level looks.",
+  scale_note:"PSL rates facial harmony, proportions and how defined your cheekbones and jaw are. It is a reference point for self-improvement, not an objective measure of your worth.",
+  scan_h:"Face scan", scan_p:"Your photo is processed for analysis and not stored. The result stays on your device only.",
+  drop1:"Upload or drop a photo", drop2:"JPG / PNG · front-facing · no filters",
+  chk_age:"I am 18 or older",
+  chk_agree:'I accept the <a href="#terms" data-open="terms">terms</a> and the <a href="#privacy" data-open="privacy">privacy policy</a>',
+  go:"Start analysis",
+  idle_e:"Waiting for photo", idle_h:"Your report will appear here", idle_p:"The better the photo, the sharper the breakdown. Four rules:",
+  tip1:"<b>Front-facing</b>Look straight into the camera, head level", tip2:"<b>Light</b>Daylight from the front, no harsh shadows",
+  tip3:"<b>No filters</b>Skin smoothing breaks the analysis", tip4:"<b>Face uncovered</b>Hair off the forehead and cheekbones",
+  run_e:"Analysis",
+  no_h:"What you won't find here", no_p:"TikTok is full of advice that hurts people. We only work with what is safe and actually delivers: skin, bloating, hair, posture, body.",
+  no1:"<b>Bonesmashing</b><span>Hitting your face doesn't reshape bone. It causes injuries and asymmetry.</span>",
+  no2:"<b>Steroids</b><span>Hormonal disruption, acne, hair loss.</span>",
+  no3:"<b>Mewing as a cure-all</b><span>Tongue posture is a good habit, but it won't rebuild an adult jaw.</span>",
+  no4:"<b>Starving</b><span>A defined face comes from moderate body fat, not exhaustion.</span>",
+  faq_h:"FAQ",
+  q1:"How accurate is the score?", a1:"<p>It's an algorithmic estimate from a single photo. Light, angle and camera all affect the result. Use it as a reference and compare yourself to yourself: same light, same angle, every 2 weeks.</p>",
+  q2:"Can I raise my PSL without surgery?", a2:"<p>Bone doesn't change without surgery. But PSL on a photo depends heavily on bloating, skin, body fat, hair, brows and neck posture. That's where real progress happens in 4–8 weeks.</p>",
+  q3:"Do you store my photo?", a3:"<p>No. The photo is resized in your browser, sent for analysis and deleted after the response. The report is stored only in your browser.</p>",
+  q4:"Why 18+ only?", a4:"<p>A teenager's face is still developing, and rating looks at that age does more harm than good. If the person in the photo appears under 18, no analysis is performed.</p>",
+  legal_h:"Legal", legal_p:"Short and to the point. Last updated: 26 October 2026.",
+  terms_h:"Terms of Use",
+  terms:`<p>By using the ZenvyMax website (the "Service") you agree to these terms. If you don't agree, don't use the Service.</p>
+<h4>1. Who can use it</h4><p>The Service is for people aged 18 and over only. By uploading a photo you confirm that you are 18 or older and that the photo shows you. Uploading photos of other people without their consent is prohibited.</p>
+<h4>2. What the score is</h4><p>The PSL score, tier and measurements are an automated estimate based on a single image. The scale is calibrated on the lenient side. The score is not an objective measure of attractiveness, a medical opinion or a doctor's recommendation.</p>
+<h4>3. Not medical advice</h4><p>All advice is general information. For skin problems, swelling, jaw pain or other symptoms, see a doctor. Stop any exercise that causes pain.</p>
+<h4>4. Prohibited</h4><ul><li>uploading photos of minors;</li><li>uploading photos of other people without consent;</li><li>using results to bully or humiliate anyone;</li><li>attempting to disrupt the Service.</li></ul>
+<h4>5. Early access</h4><p>The Service is in early access and provided "as is". We may change features, terms and prices with notice on the website.</p>
+<h4>6. Liability</h4><p>To the extent permitted by law, we are not liable for decisions made based on the score or for indirect damage arising from use of the Service.</p>
+<h4>7. Contact</h4><p>[Name or company name], [contact email]. Governing law: the law of the Republic of Poland.</p>`,
+  privacy_h:"Privacy Policy",
+  privacy:`<p>Data controller: [Name or company name], [address], [email]. We process data in accordance with the GDPR.</p>
+<h4>What data</h4><ul><li><b>Face photo.</b> Resized in your browser and sent for analysis. Not stored on our servers and deleted right after the result is returned.</li><li><b>Analysis result.</b> Stored only in your browser (localStorage). You can delete it with the "Delete report" button or by clearing site data.</li><li><b>Email.</b> Only if you choose to join the early access list. Stored in our database (Supabase, EU) until you withdraw consent, and used only for emails about ZenvyMax.</li><li><b>Technical data.</b> IP address and browser details kept by the hosting provider in security logs.</li></ul>
+<h4>Why</h4><p>Only to produce the report you requested. Legal basis: your consent (Art. 6(1)(a) and Art. 9(2)(a) GDPR). We do not use photos to identify anyone, train models or serve ads, and we do not sell data.</p>
+<h4>Who receives it</h4><p>For analysis, the image is sent over a secure connection to the AI model provider (Anthropic, PBC), which processes it on our behalf. Transfers outside the EEA may occur under Standard Contractual Clauses.</p>
+<h4>Your rights</h4><p>You can withdraw consent, request access, correction or deletion of your data, restrict processing and lodge a complaint with the Polish data protection authority (UODO). Contact [email].</p>
+<h4>Cookies</h4><p>The site uses no advertising or analytics cookies. Local storage is used only to keep your report and chosen language.</p>`,
+  disc_h:"Disclaimer",
+  disc:"<p>ZenvyMax is not a medical service. Scores and advice do not replace a dermatologist, dentist, orthodontist or psychologist. If thoughts about your looks are getting in the way of your life, that's a reason to talk to a professional, not to chase a higher PSL.</p>",
+  foot:"© 2026 ZenvyMax · early access"
+};
+const RU = {};
+document.querySelectorAll("[data-i18n]").forEach(el => { const k = el.dataset.i18n; if (!(k in RU)) RU[k] = el.innerHTML; });
+
+/* ===== ПЕРЕВОДЫ: динамические строки ===== */
+const T = {
+  ru:{
+    steps:["Поиск лица на фото","Трети лица и пропорции","Наклон глаз и межзрачковое расстояние","Скулы, FWHR, средняя зона","Линия челюсти и подбородок","Кожа: текстура и тон","Отёчность и зона под глазами","Причёска относительно формы лица","Сборка отчёта"],
+    errType:"Нужен файл изображения: JPG или PNG.", errOpen:"Не удалось открыть файл. Попробуй другое фото.", errApi:"Анализ сейчас недоступен. Попробуй через пару минут.",
+    photoAlt:"Твоё фото",
+    demo:"Демо-режим · ИИ не подключён, результат примерный", yours:"Твой результат",
+    tierText:{ MTN:"Средний уровень. Здесь самый быстрый рост: большинство пунктов ниже решаются привычками.", HTN:"Выше среднего. Структура хорошая, дальше решают детали: кожа, отёчность, причёска." },
+    sev:{ high:"Высокий приоритет", mid:"Средний", low:"Низкий" },
+    hMetrics:"Замеры", approx:"≈ по фото", hFix:"Что исправлять · по приоритету", hStrong:"Сильные стороны", hVerdict:"Вердикт",
+    goal:t => `Цель на 30 дней: уверенный ${t}-уровень на фото.`,
+    cta:"Получить план на 30 дней — бесплатно",
+    wlLabel:"Оставь email — пришлём план на 30 дней, когда откроем ранний доступ.", wlBad:"Проверь email: похоже, в нём опечатка.", wlErr:"Не получилось сохранить. Попробуй ещё раз.", wlOk:"Готово. Ты в списке раннего доступа.", again:"Новый скан", wipe:"Удалить отчёт",
+    mk:{ canthal:"Кантальный наклон", fwhr:"FWHR", midface:"Midface ratio", thirds:"Трети лица", sym:"Симметрия", gonial:"Гониальный угол" },
+    ms:{ hunter:"Hunter eyes зона", pos:"Положительный", neutral:"Нейтральный", wide:"Широкое, маскулинное", fwhrN:"Норма 1.8–2.0", mid1:"Близко к 1.0", mid0:"Отклонение от 1.0", thirds:"Идеал 33 / 33 / 33", symHi:"Высокая", norm:"Норма", gonGood:"Чёткий угол", gonBad:"Сглажен" },
+    verdict:"База хорошая. Самый быстрый рост — отёчность и всё, что прячет линию челюсти: за 2–4 недели это заметно на фото. Дальше кожа и причёска.",
+    zones:{
+      bloat:{ t:"Отёчность нижней трети", obs:"Мягкий контур от скул к подбородку, линия челюсти читается слабо. На фото это съедает до половины балла.",
+        do:["2–2,5 л воды в день, последний большой стакан за 2 часа до сна","Соль и алкоголь вечером — главные причины утренних отёков","Лимфодренаж 3 минуты утром: от носа к ушам, от ушей вниз по шее","Умывание холодной водой сразу после подъёма"] },
+      jaw:{ t:"Линия челюсти", obs:"Гониальный угол сглажен, переход челюсть–шея размыт.",
+        do:["Главный рычаг — процент жира: дефицит 300–400 ккал и 8–10 тыс. шагов","Лёгкая щетина 2–4 мм визуально усиливает угол челюсти","Chin tucks: 3 подхода по 10 раз в день","Жвачку часами не жевать: это нагружает сустав, а не «качает» челюсть"] },
+      skin:{ t:"Текстура и тон кожи", obs:"Неровный тон и мелкие воспаления в Т-зоне. Кожа снижает оценку сильнее, чем кажется.",
+        do:["Мягкое очищающее средство утром и вечером","SPF 30+ каждое утро, даже в пасмурную погоду","Ниацинамид утром, ретиноид вечером 2 раза в неделю с постепенным увеличением","Не выдавливать: пятна держатся месяцами","Много воспалений — к дерматологу, это лечится"] },
+      eyes:{ t:"Зона под глазами", obs:"Тени и лёгкая припухлость под глазами, взгляд выглядит уставшим.",
+        do:["Сон 7–9 часов в одно и то же время","Холодные ложки или патчи утром, 2 минуты","Крем с кофеином под глаза","Экран за час до сна — в ночной режим"] },
+      hair:{ t:"Причёска не подходит форме лица", obs:"Текущая форма не работает на овал: объём распределён так, что лицо выглядит шире и короче.",
+        do:["Больше объёма сверху, короче по бокам — лицо визуально вытягивается","Покажи барберу фронтальное фото и попроси стрижку под форму лица","Матовая паста вместо геля: текстура вместо блеска","Обновлять форму каждые 3–4 недели"] },
+      brows:{ t:"Брови", obs:"Брови без формы, внешний край опущен. Это смягчает взгляд и съедает выраженность глаз.",
+        do:["Убрать только лишнее между бровями и снизу","Форму не выщипывать в нитку: густые брови работают на маскулинность","Гель для бровей, чтобы зафиксировать направление волос"] },
+      posture:{ t:"Осанка шеи", obs:"Голова вынесена вперёд, под подбородком собирается мягкая ткань. На фото это прячет челюсть.",
+        do:["Стена: пятки, лопатки, затылок касаются, 2 × 30 секунд","Монитор и телефон на уровне глаз","На фото: подбородок чуть вперёд и вниз, а не вверх"] }
+    },
+    strong:[["Симметрия","Левая и правая сторона хорошо сбалансированы"],["Межглазное расстояние","В гармоничном диапазоне"],["Положительный кантальный наклон","Внешние уголки глаз выше внутренних"],["Пропорции третей","Близко к идеалу 1:1:1"],["Форма носа","Ровная спинка, не перегружает центр лица"],["Губы","Хороший объём, верхняя к нижней около 1:1.5"]]
+  },
+  en:{
+    steps:["Detecting the face","Facial thirds and proportions","Eye tilt and interpupillary distance","Cheekbones, FWHR, midface","Jawline and chin","Skin: texture and tone","Bloating and under-eye area","Hairstyle vs face shape","Building the report"],
+    errType:"Please choose an image file: JPG or PNG.", errOpen:"Couldn't open the file. Try another photo.", errApi:"Analysis is unavailable right now. Try again in a couple of minutes.",
+    photoAlt:"Your photo",
+    demo:"Demo mode · AI not connected, approximate result", yours:"Your result",
+    tierText:{ MTN:"Average. This is where you grow fastest: most points below are fixed by habits.", HTN:"Above average. The structure is good, now the details decide: skin, bloating, hair." },
+    sev:{ high:"High priority", mid:"Medium", low:"Low" },
+    hMetrics:"Measurements", approx:"≈ from photo", hFix:"What to fix · by priority", hStrong:"Strengths", hVerdict:"Verdict",
+    goal:t => `30-day goal: a solid ${t} tier on camera.`,
+    cta:"Get the 30-day plan — free",
+    wlLabel:"Leave your email and we'll send the 30-day plan when early access opens.", wlBad:"Check your email: it looks like there's a typo.", wlErr:"Couldn't save that. Please try again.", wlOk:"Done. You're on the early access list.", again:"New scan", wipe:"Delete report",
+    mk:{ canthal:"Canthal tilt", fwhr:"FWHR", midface:"Midface ratio", thirds:"Facial thirds", sym:"Symmetry", gonial:"Gonial angle" },
+    ms:{ hunter:"Hunter eyes range", pos:"Positive", neutral:"Neutral", wide:"Wide, masculine", fwhrN:"Normal 1.8–2.0", mid1:"Close to 1.0", mid0:"Off from 1.0", thirds:"Ideal 33 / 33 / 33", symHi:"High", norm:"Normal", gonGood:"Sharp angle", gonBad:"Soft" },
+    verdict:"Solid base. Your fastest win is bloating and anything that hides the jawline: it shows on camera within 2–4 weeks. Skin and hair come next.",
+    zones:{
+      bloat:{ t:"Lower-third bloating", obs:"Soft contour from cheekbones to chin, the jawline barely reads. On camera this costs up to half a point.",
+        do:["2–2.5 L of water a day, last big glass 2 hours before bed","Salt and alcohol in the evening are the main causes of morning puffiness","3-minute lymphatic drainage in the morning: nose to ears, then down the neck","Splash your face with cold water right after waking up"] },
+      jaw:{ t:"Jawline", obs:"The gonial angle is soft and the jaw-to-neck transition is blurred.",
+        do:["The main lever is body fat: a 300–400 kcal deficit and 8–10k steps a day","Light stubble at 2–4 mm visually sharpens the jaw angle","Chin tucks: 3 sets of 10 a day","Don't chew gum for hours: it strains the joint instead of building the jaw"] },
+      skin:{ t:"Skin texture and tone", obs:"Uneven tone and small breakouts in the T-zone. Skin drags the score down more than you'd think.",
+        do:["Gentle cleanser morning and evening","SPF 30+ every morning, even when it's cloudy","Niacinamide in the morning, retinoid twice a week in the evening, building up slowly","Don't pick: marks last for months","Lots of breakouts means a dermatologist visit. It's treatable"] },
+      eyes:{ t:"Under-eye area", obs:"Shadows and slight puffiness under the eyes make you look tired.",
+        do:["7–9 hours of sleep at a consistent time","Cold spoons or patches in the morning, 2 minutes","Caffeine eye cream","Night mode on screens an hour before bed"] },
+      hair:{ t:"Hairstyle doesn't suit your face shape", obs:"The current shape doesn't work for your face: the volume makes it look wider and shorter.",
+        do:["More volume on top, shorter on the sides to lengthen the face","Show your barber a front photo and ask for a cut for your face shape","Matte paste instead of gel: texture over shine","Refresh the shape every 3–4 weeks"] },
+      brows:{ t:"Brows", obs:"Brows lack shape and the outer ends droop. That softens the gaze and weakens the eye area.",
+        do:["Remove only the stray hairs between and below the brows","Don't overpluck: thick brows read as masculine","Use brow gel to set the direction of the hairs"] },
+      posture:{ t:"Neck posture", obs:"Forward head posture gathers soft tissue under the chin. On camera this hides the jaw.",
+        do:["Wall drill: heels, shoulder blades and back of head touching, 2 × 30 seconds","Keep your monitor and phone at eye level","In photos: chin slightly forward and down, not up"] }
+    },
+    strong:[["Symmetry","Left and right sides are well balanced"],["Eye spacing","Within the harmonious range"],["Positive canthal tilt","Outer eye corners sit higher than inner ones"],["Proportions of thirds","Close to the 1:1:1 ideal"],["Nose shape","Straight bridge that doesn't overload the midface"],["Lips","Good volume, upper to lower around 1:1.5"]]
+  }
+};
+const L = () => T[lang];
+
+function setLang(l){
+  lang = l === "en" ? "en" : "ru";
+  document.documentElement.lang = lang;
+  try { localStorage.setItem("ascend_lang", lang); } catch(e){}
+  document.querySelectorAll("[data-i18n]").forEach(el => {
+    const k = el.dataset.i18n, v = (lang === "en" ? EN : RU)[k];
+    if (v != null) el.innerHTML = v;
+  });
+  $("lang-ru").setAttribute("aria-pressed", lang === "ru");
+  $("lang-en").setAttribute("aria-pressed", lang === "en");
+  bindOpen();
+  const img = drop.querySelector("img"); if (img) img.alt = L().photoAlt;
+  if (report && !$("res").hidden) render(report);
+  if (!$("run").hidden) $("log").querySelectorAll("div").forEach((d,i) => { d.lastChild.textContent = L().steps[i]; });
+}
+document.querySelectorAll(".lang button").forEach(b => b.addEventListener("click", () => setLang(b.dataset.lang)));
+
+/* открыть юр. раздел по ссылке */
+function bindOpen(){
+  document.querySelectorAll("[data-open]").forEach(a => { a.onclick = () => { const d = $(a.dataset.open); if (d) d.open = true; }; });
+}
+
+/* ===== ЗАГРУЗКА ===== */
+const drop = $("drop"), file = $("file");
+function ready(){ $("go").disabled = !(photo && $("age").checked && $("agree").checked); }
+["age","agree"].forEach(id => $(id).addEventListener("change", ready));
+file.addEventListener("change", e => e.target.files[0] && load(e.target.files[0]));
+["dragenter","dragover"].forEach(ev => drop.addEventListener(ev, e => { e.preventDefault(); drop.classList.add("drag"); }));
+["dragleave","drop"].forEach(ev => drop.addEventListener(ev, e => { e.preventDefault(); drop.classList.remove("drag"); }));
+drop.addEventListener("drop", e => { const f = e.dataTransfer.files[0]; if (f) load(f); });
+
+function load(f){
+  $("err").textContent = "";
+  if (!f.type.startsWith("image/")) { $("err").textContent = L().errType; return; }
+  const img = new Image();
+  img.onload = () => {
+    const tw = 720, th = 900, r = tw/th;
+    let sw = img.width, sh = img.height, sx = 0, sy = 0;
+    if (sw/sh > r) { sw = sh*r; sx = (img.width-sw)/2; } else { sh = sw/r; sy = Math.max(0,(img.height-sh)*0.35); }
+    const c = document.createElement("canvas"); c.width = tw; c.height = th;
+    c.getContext("2d").drawImage(img, sx, sy, sw, sh, 0, 0, tw, th);
+    photo = c.toDataURL("image/jpeg", .86);
+    drop.querySelectorAll("img,svg.overlay").forEach(n => n.remove());
+    const p = new Image(); p.src = photo; p.alt = L().photoAlt; drop.insertBefore(p, drop.firstChild);
+    drop.insertAdjacentHTML("beforeend", overlaySVG());
+    drop.classList.add("has");
+    ready();
+  };
+  img.onerror = () => { $("err").textContent = L().errOpen; };
+  img.src = URL.createObjectURL(f);
+}
+
+function overlaySVG(){
+  return `<svg class="overlay" viewBox="0 0 100 125" preserveAspectRatio="none" aria-hidden="true">
+    <line class="ov-el dash" x1="50" y1="8" x2="50" y2="118"/>
+    <line class="ov-el" x1="18" y1="34" x2="82" y2="34"/>
+    <line class="ov-el" x1="18" y1="58" x2="82" y2="58"/>
+    <line class="ov-el" x1="18" y1="80" x2="82" y2="80"/>
+    <line class="ov-el dash" x1="24" y1="50" x2="76" y2="50"/>
+    <path class="ov-el" d="M28 62 L31 84 L42 98 L50 101 L58 98 L69 84 L72 62"/>
+    <circle class="ov-el" cx="37" cy="50" r="1"/><circle class="ov-el" cx="63" cy="50" r="1"/>
+    <circle class="ov-el" cx="50" cy="69" r="1"/><circle class="ov-el" cx="50" cy="86" r="1"/>
+    <circle class="ov-el" cx="31" cy="84" r="1"/><circle class="ov-el" cx="69" cy="84" r="1"/>
+  </svg>`;
+}
+
+/* ===== АНАЛИЗ ===== */
+$("go").addEventListener("click", run);
+
+async function run(){
+  $("go").disabled = true; $("err").textContent = "";
+  $("idle").hidden = true; $("res").hidden = true; $("run").hidden = false;
+  drop.classList.add("scanning");
+  const els = [...drop.querySelectorAll(".ov-el")]; els.forEach(e => e.classList.remove("on"));
+  $("log").innerHTML = L().steps.map(s => `<div><b>····</b><span>${s}</span></div>`).join("");
+  const rows = [...$("log").children];
+  if (innerWidth < 960) $("out").scrollIntoView({behavior:"smooth", block:"start"});
+
+  const api = API_URL ? callApi().catch(e => ({error: e.message})) : Promise.resolve(null);
+  const t0 = performance.now();
+  await new Promise(done => {
+    (function tick(){
+      const k = Math.min(1, (performance.now()-t0)/SCAN_MS);
+      $("pct").textContent = Math.floor(k*100) + "%";
+      $("pbar").style.width = (k*100) + "%";
+      const n = Math.floor(k*rows.length);
+      rows.forEach((r,i) => {
+        r.classList.toggle("done", i < n); r.classList.toggle("cur", i === n);
+        r.firstChild.textContent = i < n ? "ok" : i === n ? "...." : "····";
+      });
+      els.forEach((e,i) => e.classList.toggle("on", k > i/els.length*0.9));
+      k < 1 ? requestAnimationFrame(tick) : done();
+    })();
+  });
+
+  let r = await api;
+  drop.classList.remove("scanning");
+  if (r && r.error) { $("run").hidden = true; $("idle").hidden = false; $("err").textContent = r.error; ready(); return; }
+  if (!r) r = demo(photo);
+  else r.lang = lang;
+  r.psl = Math.min(PSL_MAX, Math.max(PSL_MIN, +r.psl || 4.1));
+  report = r;
+  try { localStorage.setItem("ascend_report", JSON.stringify(r)); } catch(e){}
+  render(r); ready();
+}
+
+function sbHeaders(){
+  return {"Content-Type":"application/json", "apikey":SUPABASE_ANON_KEY, "Authorization":"Bearer " + SUPABASE_ANON_KEY};
+}
+
+async function joinWaitlist(e){
+  e.preventDefault();
+  const t = L(), email = $("wl-email").value.trim(), msg = $("wl-msg");
+  if (!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(email)) { msg.textContent = t.wlBad; return; }
+  $("wl-btn").disabled = true; msg.textContent = "";
+  try {
+    const res = await fetch(SUPABASE_URL + "/rest/v1/waitlist", {method:"POST",
+      headers:{...sbHeaders(), "Prefer":"return=minimal"},
+      body: JSON.stringify({email, lang, psl: report ? report.psl : null})});
+    if (!res.ok && res.status !== 409) throw new Error();
+    $("wl").innerHTML = `<p class="wl-ok">${t.wlOk}</p>`;
+  } catch(err) { msg.textContent = t.wlErr; $("wl-btn").disabled = false; }
+}
+
+async function callApi(){
+  const res = await fetch(API_URL, {method:"POST", headers:sbHeaders(), body: JSON.stringify({image: photo.split(",")[1], lang})});
+  let j = {}; try { j = await res.json(); } catch(e){}
+  if (!res.ok || j.error) throw new Error(j.error || L().errApi);
+  return j;
+}
+
+/* ===== ДЕМО: стабильный результат для одного и того же фото, тексты берутся по id ===== */
+function demo(data){
+  let h = 2166136261; for (let i = 0; i < data.length; i += 61) { h ^= data.charCodeAt(i); h = Math.imul(h, 16777619); }
+  const rnd = () => { h ^= h << 13; h ^= h >>> 17; h ^= h << 5; return (h >>> 0) / 4294967296; };
+  const pick = (a,n) => a.slice().sort(() => rnd()-.5).slice(0,n);
+  const psl = +(PSL_MIN + rnd()*(PSL_MAX-PSL_MIN)).toFixed(1);
+  const t1 = 30 + Math.round(rnd()*4), t2 = 32 + Math.round(rnd()*4);
+  const zones = ["bloat", ...pick(["jaw","skin","eyes","hair","brows","posture"], 3 + (rnd() > .5 ? 1 : 0))];
+  const sevs = ["high","high","mid","mid","low"];
+  return {
+    demo:true, psl,
+    metrics:{ canthal:+(1.5+rnd()*4.5).toFixed(1), fwhr:+(1.78+rnd()*.22).toFixed(2), midface:+(.96+rnd()*.1).toFixed(2),
+      thirds:[t1,t2,100-t1-t2], symmetry:Math.round(86+rnd()*9), gonial:Math.round(118+rnd()*14) },
+    findings: zones.map((id,i) => ({ id, severity:sevs[i] })),
+    strengthIdx: pick([0,1,2,3,4,5], 2)
+  };
+}
+
+/* ===== ОТЧЁТ ===== */
+const tierOf = p => p < 3.75 ? "LTN" : p < 4.25 ? "MTN" : p < 4.75 ? "HTN" : p < 5.5 ? "Chadlite" : "Chad";
+const nextOf = { LTN:"MTN", MTN:"HTN", HTN:"Chadlite", Chadlite:"Chad", Chad:"Chad" };
+const esc = s => String(s ?? "").replace(/[&<>"]/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
+
+function metricCards(m){
+  if (!m) return "";
+  const k = L().mk, s = L().ms;
+  const c = (key,v,sub,cls) => `<div class="metric"><div class="k">${key}</div><div class="v">${v}</div><div class="s ${cls||""}">${sub}</div></div>`;
+  const out = [];
+  if (m.canthal != null) out.push(c(k.canthal, (m.canthal>0?"+":"")+m.canthal+"°", m.canthal >= 4 ? s.hunter : m.canthal > 0 ? s.pos : s.neutral, m.canthal > 0 ? "good" : ""));
+  if (m.fwhr != null) out.push(c(k.fwhr, m.fwhr, m.fwhr >= 1.9 ? s.wide : s.fwhrN, m.fwhr >= 1.9 ? "good" : ""));
+  if (m.midface != null) out.push(c(k.midface, m.midface, Math.abs(m.midface-1) <= .04 ? s.mid1 : s.mid0, Math.abs(m.midface-1) <= .04 ? "good" : "bad"));
+  if (m.thirds) out.push(c(k.thirds, m.thirds.join(" / "), s.thirds));
+  if (m.symmetry != null) out.push(c(k.sym, m.symmetry+"%", m.symmetry >= 90 ? s.symHi : s.norm, m.symmetry >= 90 ? "good" : ""));
+  if (m.gonial != null) out.push(c(k.gonial, m.gonial+"°", m.gonial <= 125 ? s.gonGood : s.gonBad, m.gonial <= 125 ? "good" : "bad"));
+  return `<div class="h-sm">${L().hMetrics} <span style="text-transform:none;letter-spacing:0">${L().approx}</span></div><div class="metrics">${out.join("")}</div>`;
+}
+
+function render(r){
+  const t = L(), tier = tierOf(r.psl), pos = Math.min(100, Math.max(0, (r.psl-3)/(6-3)*100));
+  const findings = (r.findings||[]).map(x => r.demo
+    ? { ...x, title:t.zones[x.id].t, observation:t.zones[x.id].obs, actions:t.zones[x.id].do }
+    : { ...x, title: x.title || (t.zones[x.id]||{}).t });
+  const strengths = r.demo ? (r.strengthIdx||[]).map(i => ({ title:t.strong[i][0], note:t.strong[i][1] })) : (r.strengths||[]);
+  const verdict = r.demo ? t.verdict : r.verdict;
+  const f = findings.map((x,i) => `
+    <div class="finding">
+      <div class="f-head"><h4><span class="no">${String(i+1).padStart(2,"0")}</span>${esc(x.title)}</h4><span class="sev ${esc(x.severity)}">${t.sev[x.severity]||t.sev.mid}</span></div>
+      <p class="f-obs">${esc(x.observation)}</p>
+      <ul class="f-do">${(x.actions||[]).map(a => `<li>${esc(a)}</li>`).join("")}</ul>
+    </div>`).join("");
+  const s = strengths.map(x => `<div><b>${esc(x.title)}</b>${esc(x.note)}</div>`).join("");
+  $("res").innerHTML = `
+    ${r.demo ? `<div class="demo-chip">${t.demo}</div>` : ""}
+    <div class="eyebrow">${t.yours}</div>
+    <div class="res-top" style="margin-top:14px">
+      <div class="psl-big">${r.psl.toFixed(1)}<small>/ 8 PSL</small></div>
+      <span class="tier" style="margin-bottom:14px">${tier}</span>
+    </div>
+    <p class="res-sub">${t.tierText[tier] || ""}</p>
+    <div class="meter"><div class="pin" id="pin" style="left:${pos}%"></div></div>
+    <div class="meter-lbl"><span style="left:17%">LTN</span><span style="left:33%">MTN</span><span style="left:50%">HTN</span><span style="left:70%">Chadlite</span><span style="left:100%">Chad</span></div>
+    ${metricCards(r.metrics)}
+    <div class="h-sm">${t.hFix}</div>
+    ${f}
+    ${s ? `<div class="h-sm">${t.hStrong}</div><div class="strong">${s}</div>` : ""}
+    <div class="verdict">
+      <div class="eyebrow">${t.hVerdict}</div>
+      <p style="margin-top:12px">${esc(verdict)}</p>
+      <p style="margin-top:10px;color:var(--muted);font-size:15px">${t.goal(nextOf[tier])}</p>
+      ${SUPABASE_URL ? `<form class="wl" id="wl" novalidate>
+        <label for="wl-email" class="wl-l">${t.wlLabel}</label>
+        <div class="wl-row"><input type="email" id="wl-email" autocomplete="email" placeholder="you@email.com" required><button class="btn btn-red" id="wl-btn" type="submit">${t.cta}</button></div>
+        <div class="err" id="wl-msg" role="status"></div>
+      </form>` : ""}
+      <div class="act">
+        ${SUPABASE_URL ? "" : `<a class="btn btn-red" href="${CTA_URL}" target="_blank" rel="noopener">${t.cta}</a>`}
+        <button class="btn btn-ghost" id="again">${t.again}</button>
+        <button class="btn btn-ghost" id="wipe">${t.wipe}</button>
+      </div>
+    </div>`;
+  $("run").hidden = true; $("res").hidden = false;
+  if ($("wl")) $("wl").addEventListener("submit", joinWaitlist);
+  $("again").onclick = () => { $("res").hidden = true; $("idle").hidden = false; drop.scrollIntoView({behavior:"smooth", block:"center"}); };
+  $("wipe").onclick = () => { try { localStorage.removeItem("ascend_report"); } catch(e){} report = null; $("res").hidden = true; $("idle").hidden = false; };
+}
+
+/* ===== СТАРТ ===== */
+let startLang = /^ru|^uk|^be|^kk/i.test(navigator.language || "") ? "ru" : "en";
+try { startLang = localStorage.getItem("ascend_lang") || startLang; } catch(e){}
+try {
+  const saved = JSON.parse(localStorage.getItem("ascend_report") || "null");
+  if (saved && saved.psl && (saved.demo ? saved.strengthIdx : true)) { report = saved; $("idle").hidden = true; $("res").hidden = false; }
+} catch(e){}
+setLang(startLang);
+if (report) render(report);
+</script>
+</body>
+</html>
